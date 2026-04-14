@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import Notification from '../components/Notification.jsx';
+import Breadcrumb from '../components/Breadcrumb.jsx';
+import { SkeletonStatCard, SkeletonCard } from '../components/SkeletonLoader.jsx';
 import api from '../services/api';
 import { connectSocket } from '../socket/socket';
 
@@ -43,6 +45,7 @@ export default function Dashboard() {
     <div className="app-shell">
       <Sidebar />
       <main className="main-content">
+        <Breadcrumb />
         <div className="page-header">
           <h1>Welcome back, {user.name.split(' ')[0]} 👋</h1>
           <p>Here's an overview of your complaints and local announcements in <strong>{user.area}</strong>.</p>
@@ -50,26 +53,37 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="card-grid">
-          <div className="stat-card">
-            <span className="stat-label">Total Complaints</span>
-            <span className="stat-value">{complaints.length}</span>
-            <span className="stat-sub">Submitted by you</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">Pending</span>
-            <span className="stat-value" style={{ color: '#783100' }}>{pending}</span>
-            <span className="stat-sub">Awaiting action</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">In Progress</span>
-            <span className="stat-value" style={{ color: 'var(--on-secondary-cont)' }}>{inProgress}</span>
-            <span className="stat-sub">Being addressed</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">Resolved</span>
-            <span className="stat-value" style={{ color: 'var(--success)' }}>{resolved}</span>
-            <span className="stat-sub">Completed</span>
-          </div>
+          {loading ? (
+            <>
+              <SkeletonStatCard />
+              <SkeletonStatCard />
+              <SkeletonStatCard />
+              <SkeletonStatCard />
+            </>
+          ) : (
+            <>
+              <div className="stat-card">
+                <span className="stat-label">Total Complaints</span>
+                <span className="stat-value">{complaints.length}</span>
+                <span className="stat-sub">Submitted by you</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Pending</span>
+                <span className="stat-value" style={{ color: '#783100' }}>{pending}</span>
+                <span className="stat-sub">Awaiting action</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">In Progress</span>
+                <span className="stat-value" style={{ color: 'var(--on-secondary-cont)' }}>{inProgress}</span>
+                <span className="stat-sub">Being addressed</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Resolved</span>
+                <span className="stat-value" style={{ color: 'var(--success)' }}>{resolved}</span>
+                <span className="stat-sub">Completed</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -80,15 +94,24 @@ export default function Dashboard() {
               <button className="btn-secondary btn-sm" onClick={() => navigate('/complaints')}>View all</button>
             </div>
             {loading ? (
-              <div className="loading-center"><span className="spinner" /></div>
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
             ) : recent.length === 0 ? (
-              <div className="empty-state"><p>No complaints yet. <button className="btn-primary btn-sm" onClick={() => navigate('/complaints')}>File one</button></p></div>
+              <div className="empty-state">
+                <p>No complaints yet.</p>
+                <button className="btn-primary btn-sm" style={{ marginTop: '0.5rem' }} onClick={() => navigate('/complaints')}>File one</button>
+              </div>
             ) : (
               <div className="complaint-list">
                 {recent.map((c) => (
                   <div className="complaint-card" key={c._id}>
                     <div className="meta">
-                      <span className={`badge badge-${c.status}`}>{c.status.replace('_', ' ')}</span>
+                      <span className={`badge badge-${c.status}`}>
+                        <span className={`status-dot ${c.status}`}></span>
+                        {c.status.replace('_', ' ')}
+                      </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--on-surface-var)' }}>{c.category}</span>
                     </div>
                     <h4>{c.title}</h4>
@@ -106,7 +129,10 @@ export default function Dashboard() {
               <button className="btn-secondary btn-sm" onClick={() => navigate('/announcements')}>View all</button>
             </div>
             {loading ? (
-              <div className="loading-center"><span className="spinner" /></div>
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
             ) : announcements.slice(0, 3).length === 0 ? (
               <div className="empty-state"><p>No announcements for {user.area} yet.</p></div>
             ) : (
@@ -115,6 +141,9 @@ export default function Dashboard() {
                   <div className="announcement-card" key={a._id}>
                     <h4>{a.title}</h4>
                     <p>{a.content.substring(0, 100)}{a.content.length > 100 ? '…' : ''}</p>
+                    <div className="ann-meta">
+                      <span>{new Date(a.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                    </div>
                   </div>
                 ))}
               </div>

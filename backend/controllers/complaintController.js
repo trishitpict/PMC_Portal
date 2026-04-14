@@ -4,7 +4,7 @@ const { emitToUser } = require('../sockets/socketHandler');
 // @route  POST /api/complaints
 // @access Private (citizen)
 const createComplaint = async (req, res) => {
-  const { title, description, category } = req.body;
+  const { title, description, category, location } = req.body;
 
   if (!title || !description || !category) {
     return res.status(400).json({ message: 'title, description and category are required' });
@@ -16,6 +16,11 @@ const createComplaint = async (req, res) => {
       title,
       description,
       category,
+      location: location || {
+        coordinates: { latitude: null, longitude: null },
+        address: '',
+        area: '',
+      },
     });
 
     res.status(201).json(complaint);

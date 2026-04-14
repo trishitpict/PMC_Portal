@@ -9,9 +9,20 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [validation, setValidation] = useState({ email: '', password: '' });
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Real-time validation
+    if (name === 'email') {
+      const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      setValidation({ ...validation, email: value && !isValid ? 'Please enter a valid email' : '' });
+    } else if (name === 'password') {
+      setValidation({ ...validation, password: value && value.length < 1 ? 'Password is required' : '' });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,7 +46,7 @@ export default function Login() {
         <p className="subtitle">Pune Municipal Corporation · Citizen Services</p>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className={`form-group ${validation.email ? 'has-error' : ''}`}>
             <label htmlFor="email">Email Address</label>
             <input
               id="email"
@@ -48,8 +59,9 @@ export default function Login() {
               required
               autoComplete="email"
             />
+            {validation.email && <p className="form-hint error">{validation.email}</p>}
           </div>
-          <div className="form-group">
+          <div className={`form-group ${validation.password ? 'has-error' : ''}`}>
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -62,11 +74,12 @@ export default function Login() {
               required
               autoComplete="current-password"
             />
+            {validation.password && <p className="form-hint error">{validation.password}</p>}
           </div>
 
-          {error && <p className="form-error">{error}</p>}
+          {error && <div className="info-box" style={{ background: 'rgba(186, 26, 26, 0.05)', borderLeftColor: 'var(--error)' }}>{error}</div>}
 
-          <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
+          <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={loading || validation.email || validation.password}>
             {loading ? <span className="spinner" /> : 'Sign In'}
           </button>
         </form>

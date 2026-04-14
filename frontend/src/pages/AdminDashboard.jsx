@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import Notification from '../components/Notification.jsx';
+import Breadcrumb from '../components/Breadcrumb.jsx';
+import { SkeletonStatCard, SkeletonRow } from '../components/SkeletonLoader.jsx';
 import api from '../services/api';
 import { connectSocket } from '../socket/socket';
 
@@ -32,6 +34,7 @@ export default function AdminDashboard() {
     <div className="app-shell">
       <Sidebar />
       <main className="main-content">
+        <Breadcrumb />
         <div className="page-header">
           <h1>Admin Dashboard</h1>
           <p>Welcome back, <strong>{user.name}</strong>. Here's today's overview.</p>
@@ -39,30 +42,41 @@ export default function AdminDashboard() {
 
         {/* Stat cards */}
         <div className="card-grid">
-          <div className="stat-card">
-            <span className="stat-label">Total Complaints</span>
-            <span className="stat-value">{loading ? '—' : total}</span>
-            <span className="stat-sub">All time</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">Pending</span>
-            <span className="stat-value" style={{ color: '#783100' }}>{loading ? '—' : pending}</span>
-            <span className="stat-sub">Needs attention</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">In Progress</span>
-            <span className="stat-value" style={{ color: 'var(--on-secondary-cont)' }}>{loading ? '—' : inProgress}</span>
-            <span className="stat-sub">Being addressed</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-label">Resolved</span>
-            <span className="stat-value" style={{ color: 'var(--success)' }}>{loading ? '—' : resolved}</span>
-            <span className="stat-sub">Completed</span>
-          </div>
+          {loading ? (
+            <>
+              <SkeletonStatCard />
+              <SkeletonStatCard />
+              <SkeletonStatCard />
+              <SkeletonStatCard />
+            </>
+          ) : (
+            <>
+              <div className="stat-card">
+                <span className="stat-label">Total Complaints</span>
+                <span className="stat-value">{total}</span>
+                <span className="stat-sub">All time</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Pending</span>
+                <span className="stat-value" style={{ color: '#783100' }}>{pending}</span>
+                <span className="stat-sub">Needs attention</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">In Progress</span>
+                <span className="stat-value" style={{ color: 'var(--on-secondary-cont)' }}>{inProgress}</span>
+                <span className="stat-sub">Being addressed</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Resolved</span>
+                <span className="stat-value" style={{ color: 'var(--success)' }}>{resolved}</span>
+                <span className="stat-sub">Completed</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Quick actions */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
           <button className="btn-primary" onClick={() => navigate('/admin/complaints')}>
             📋 Manage Complaints
           </button>
@@ -80,7 +94,25 @@ export default function AdminDashboard() {
         </div>
 
         {loading ? (
-          <div className="loading-center"><span className="spinner" /></div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Citizen</th>
+                  <th>Area</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Filed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonRow key={i} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : recent.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📭</div>
@@ -101,7 +133,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {recent.map((c) => (
-                  <tr key={c._id}>
+                  <tr key={c._id} style={{ cursor: 'pointer' }} onClick={() => navigate('/admin/complaints')}>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{c.userId?.name ?? '—'}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--on-surface-var)' }}>{c.userId?.email ?? ''}</div>
@@ -115,7 +147,12 @@ export default function AdminDashboard() {
                         {c.category}
                       </span>
                     </td>
-                    <td><span className={`badge badge-${c.status}`}>{c.status.replace('_', ' ')}</span></td>
+                    <td>
+                      <span className={`badge badge-${c.status}`}>
+                        <span className={`status-dot ${c.status}`}></span>
+                        {c.status.replace('_', ' ')}
+                      </span>
+                    </td>
                     <td style={{ fontSize: '0.78rem', color: 'var(--on-surface-var)', whiteSpace: 'nowrap' }}>
                       {new Date(c.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>

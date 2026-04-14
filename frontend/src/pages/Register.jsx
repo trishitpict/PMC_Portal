@@ -10,9 +10,22 @@ export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', area: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [validation, setValidation] = useState({ name: '', email: '', password: '', area: '' });
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Real-time validation
+    if (name === 'name') {
+      setValidation({ ...validation, name: value && value.trim().length < 3 ? 'Name must be at least 3 characters' : '' });
+    } else if (name === 'email') {
+      const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      setValidation({ ...validation, email: value && !isValid ? 'Please enter a valid email' : '' });
+    } else if (name === 'password') {
+      setValidation({ ...validation, password: value && value.length < 6 ? 'Password must be at least 6 characters' : '' });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +50,7 @@ export default function Register() {
         <p className="subtitle">Create your citizen account</p>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className={`form-group ${validation.name ? 'has-error' : ''}`}>
             <label htmlFor="name">Full Name</label>
             <input
               id="name" name="name" type="text"
@@ -47,9 +60,10 @@ export default function Register() {
               onChange={handleChange}
               required
             />
+            {validation.name && <p className="form-hint error">{validation.name}</p>}
           </div>
 
-          <div className="form-group">
+          <div className={`form-group ${validation.email ? 'has-error' : ''}`}>
             <label htmlFor="reg-email">Email Address</label>
             <input
               id="reg-email" name="email" type="email"
@@ -59,9 +73,10 @@ export default function Register() {
               onChange={handleChange}
               required
             />
+            {validation.email && <p className="form-hint error">{validation.email}</p>}
           </div>
 
-          <div className="form-group">
+          <div className={`form-group ${validation.password ? 'has-error' : ''}`}>
             <label htmlFor="reg-pass">Password</label>
             <input
               id="reg-pass" name="password" type="password"
@@ -72,32 +87,34 @@ export default function Register() {
               required
               minLength={6}
             />
+            {validation.password && <p className="form-hint error">{validation.password}</p>}
           </div>
 
-          <div className="form-group">
-            <label htmlFor="area">Your Area (Pune)</label>
+          <div className={`form-group ${validation.area ? 'has-error' : ''}`}>
+            <label htmlFor="area">Your Area (Pune) <span style={{ color: 'var(--error)' }}>*</span></label>
             <select
               id="area" name="area"
               className="form-control"
               value={form.area}
               onChange={handleChange}
               required
+              aria-label="Select your area"
             >
               <option value="">— Select your area —</option>
               {AREAS.map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
             </select>
+            {validation.area && <p className="form-hint error">{validation.area}</p>}
           </div>
 
-
-          {error && <p className="form-error">{error}</p>}
+          {error && <div className="info-box" style={{ background: 'rgba(186, 26, 26, 0.05)', borderLeftColor: 'var(--error)' }}>{error}</div>}
 
           <button
             type="submit"
             className="btn-primary"
             style={{ width: '100%', justifyContent: 'center' }}
-            disabled={loading}
+            disabled={loading || validation.name || validation.email || validation.password}
           >
             {loading ? <span className="spinner" /> : 'Register'}
           </button>

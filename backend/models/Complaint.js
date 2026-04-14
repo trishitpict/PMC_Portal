@@ -30,6 +30,26 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    location: {
+      coordinates: {
+        latitude: {
+          type: Number,
+          required: false,
+        },
+        longitude: {
+          type: Number,
+          required: false,
+        },
+      },
+      address: {
+        type: String,
+        default: '',
+      },
+      area: {
+        type: String,
+        default: '',
+      },
+    },
   },
   { timestamps: true }
 );
