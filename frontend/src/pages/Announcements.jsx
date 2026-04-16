@@ -87,7 +87,13 @@ export default function Announcements() {
                 <div className="announcement-card" key={a._id}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.5rem' }}>
                     <h4>{a.title}</h4>
-                    <span className="badge" style={{ background: 'var(--secondary-cont)', color: 'var(--on-secondary-cont)', flexShrink: 0, whiteSpace: 'nowrap' }}>{a.area}</span>
+                    <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      {a.areas && a.areas.map((area) => (
+                        <span key={area} className="badge" style={{ background: 'var(--secondary-cont)', color: 'var(--on-secondary-cont)', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                          {area}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <p>{a.content}</p>
                   <div className="ann-meta">

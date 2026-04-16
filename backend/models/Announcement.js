@@ -12,11 +12,10 @@ const announcementSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    area: {
+    areas: [{
       type: String,
       enum: AREAS,
-      required: true,
-    },
+    }],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

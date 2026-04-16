@@ -50,6 +50,10 @@ const complaintSchema = new mongoose.Schema(
         default: '',
       },
     },
+    images: [{
+      type: String,
+      default: [],
+    }],
   },
   { timestamps: true }
 );

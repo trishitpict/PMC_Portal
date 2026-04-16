@@ -1,5 +1,30 @@
 const Complaint = require('../models/Complaint');
 const { emitToUser } = require('../sockets/socketHandler');
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Store in uploads folder
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
 
 // @route  POST /api/complaints
 // @access Private (citizen)
@@ -10,17 +35,35 @@ const createComplaint = async (req, res) => {
     return res.status(400).json({ message: 'title, description and category are required' });
   }
 
+  // Parse location if it's a string
+  let parsedLocation = location;
+  if (typeof location === 'string') {
+    try {
+      parsedLocation = JSON.parse(location);
+    } catch (e) {
+      parsedLocation = {
+        coordinates: { latitude: null, longitude: null },
+        address: '',
+        area: '',
+      };
+    }
+  }
+
+  // Get uploaded file paths
+  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+
   try {
     const complaint = await Complaint.create({
       userId: req.user._id,
       title,
       description,
       category,
-      location: location || {
+      location: parsedLocation || {
         coordinates: { latitude: null, longitude: null },
         address: '',
         area: '',
       },
+      images,
     });
 
     res.status(201).json(complaint);
@@ -94,4 +137,5 @@ module.exports = {
   getUserComplaints,
   getAllComplaints,
   updateComplaintStatus,
+  upload,
 };

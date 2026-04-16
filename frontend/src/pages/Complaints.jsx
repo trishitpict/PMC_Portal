@@ -15,6 +15,8 @@ export default function Complaints() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', category: '', location: { coordinates: { latitude: null, longitude: null }, address: '', area: '' } });
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +29,30 @@ export default function Complaints() {
       setComplaints(data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const maxAllowed = 3;
+    const combined = [...selectedImages, ...files].slice(0, maxAllowed);
+
+    if (combined.length > maxAllowed) {
+      alert(`You can upload a maximum of ${maxAllowed} images.`);
+    }
+
+    setSelectedImages(combined);
+    const previews = combined.map(file => URL.createObjectURL(file));
+    setImagePreviews(previews);
+
+    // Reset the input so the same file can be selected again if needed.
+    e.target.value = '';
+  };
+
+  const removeImage = (index) => {
+    const newImages = selectedImages.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedImages(newImages);
+    setImagePreviews(newPreviews);
   };
 
   useEffect(() => { fetchComplaints(); }, []);
@@ -67,9 +93,24 @@ export default function Complaints() {
     if (!form.category) { setFormError('Please select a category.'); return; }
     setSubmitting(true);
     try {
-      await api.post('/complaints', form);
+      const formData = new FormData();
+      formData.append('title', form.title);
+      formData.append('description', form.description);
+      formData.append('category', form.category);
+      formData.append('location', JSON.stringify(form.location));
+      selectedImages.forEach(image => {
+        formData.append('images', image);
+      });
+
+      await api.post('/complaints', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       setForm({ title: '', description: '', category: '', location: { coordinates: { latitude: null, longitude: null }, address: '', area: '' } });
       setFormValidation({ title: '', description: '' });
+      setSelectedImages([]);
+      setImagePreviews([]);
       setShowForm(false);
       fetchComplaints();
     } catch (err) {
@@ -152,6 +193,55 @@ export default function Complaints() {
                   location={form.location}
                   onChange={(location) => setForm({ ...form, location })}
                 />
+
+                <div className="form-group">
+                  <label htmlFor="c-images">Attach Images (optional, max 3)</label>
+                  <input
+                    id="c-images"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="form-control"
+                  />
+                  <p className="form-hint">Upload up to 3 images to help illustrate the issue.</p>
+                </div>
+
+                {imagePreviews.length > 0 && (
+                  <div className="image-previews" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--outline)' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          style={{
+                            position: 'absolute',
+                            top: '-5px',
+                            right: '-5px',
+                            background: 'var(--error)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {formError && <p className="form-error">{formError}</p>}
                 <div className="modal-actions">
@@ -241,6 +331,29 @@ export default function Complaints() {
                   </div>
                   <h4>{c.title}</h4>
                   <p>{c.description}</p>
+
+                  {c.images && c.images.length > 0 && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {c.images.map((image, index) => (
+                          <img
+                            key={index}
+                            src={`http://localhost:5000${image}`}
+                            alt={`Complaint image ${index + 1}`}
+                            style={{
+                              width: '80px',
+                              height: '80px',
+                              objectFit: 'cover',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--outline)',
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => window.open(`http://localhost:5000${image}`, '_blank')}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   {c.location?.coordinates?.latitude && (
                     <div className="location-info" style={{ background: 'var(--primary-container)', borderRadius: 'var(--radius-md)', padding: '0.6rem 0.75rem', fontSize: '0.82rem', marginBottom: '0.75rem' }}>

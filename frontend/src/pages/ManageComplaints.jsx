@@ -188,6 +188,11 @@ export default function ManageComplaints() {
                         <div style={{ fontSize: '0.75rem', color: 'var(--on-surface-var)' }}>
                           {c.description.substring(0, 55)}{c.description.length > 55 ? '…' : ''}
                         </div>
+                        {c.images && c.images.length > 0 && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--primary)', marginTop: '0.25rem' }}>
+                            📷 {c.images.length} image{c.images.length > 1 ? 's' : ''}
+                          </div>
+                        )}
                         {c.location?.coordinates?.latitude && (
                           <div style={{ fontSize: '0.72rem', color: 'var(--primary)', marginTop: '0.25rem', fontWeight: 500 }}>
                             📍 {c.location.address || `${c.location.coordinates.latitude.toFixed(4)}, ${c.location.coordinates.longitude.toFixed(4)}`}
@@ -235,6 +240,30 @@ export default function ManageComplaints() {
               <div style={{ background: 'var(--surface-low)', borderRadius: 'var(--radius-md)', padding: '0.75rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
                 {editing.description}
               </div>
+
+              {editing.images && editing.images.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <h4 style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Attached Images</h4>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {editing.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={`http://localhost:5000${image}`}
+                        alt={`Complaint image ${index + 1}`}
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          objectFit: 'cover',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--outline)',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => window.open(`http://localhost:5000${image}`, '_blank')}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <form onSubmit={handleEditSubmit}>
                 <div className="form-group">

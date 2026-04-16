@@ -5,12 +5,13 @@ const {
   getUserComplaints,
   getAllComplaints,
   updateComplaintStatus,
+  upload,
 } = require('../controllers/complaintController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
 
 // Citizen routes
-router.post('/', protect, authorizeRoles('citizen'), createComplaint);
+router.post('/', upload.array('images', 3), protect, authorizeRoles('citizen'), createComplaint);
 router.get('/user', protect, authorizeRoles('citizen'), getUserComplaints);
 
 // Admin routes
