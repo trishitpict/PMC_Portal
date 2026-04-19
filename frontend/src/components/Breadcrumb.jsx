@@ -4,9 +4,12 @@ const breadcrumbLabels = {
   '/dashboard': 'Dashboard',
   '/complaints': 'My Complaints',
   '/announcements': 'Announcements',
+  '/services': 'Services & Contacts',
+  '/about-pune': 'About Pune',
   '/admin': 'Admin Dashboard',
   '/admin/complaints': 'Manage Complaints',
   '/admin/announcements': 'Create Announcement',
+  '/admin/services': 'Services & Contacts',
 };
 
 export default function Breadcrumb() {

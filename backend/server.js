@@ -9,6 +9,8 @@ const seedAdmin = require('./utils/seedAdmin');
 const authRoutes = require('./routes/authRoutes');
 const complaintRoutes = require('./routes/complaintRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
+const officerRoutes = require('./routes/officerRoutes');
 const { initSocket } = require('./sockets/socketHandler');
 
 // Connect to MongoDB, then seed default admin
@@ -25,6 +27,8 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/officers', officerRoutes);
 
 // Health check
 app.get('/', (req, res) => {

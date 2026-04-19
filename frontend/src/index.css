@@ -259,6 +259,317 @@ input, select, textarea {
   background: var(--on-surface);
   border-radius: 2px;
 }
+
+/* ── Municipal Services & Contacts (Gov-Tech module) ─────────────────────── */
+.govtech {
+  --gov-bg: #f4f4f4;
+  --gov-maroon: #a32a44;
+  --gov-zebra: #fdf2f4;
+}
+
+.gov-bg {
+  background: var(--gov-bg);
+}
+
+.gov-grid-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: 1.25rem;
+}
+
+.gov-grid {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.gov-action-card {
+  background: var(--surface);
+  border: 1px solid rgba(26, 31, 54, 0.18);
+  border-radius: 18px;
+  padding: 2.5rem 1.5rem;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.gov-action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.gov-action-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  color: var(--on-surface);
+  font-size: 1.05rem;
+}
+
+.gov-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.gov-filterbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.gov-subtabs {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.gov-subtab {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0.25rem;
+  color: var(--on-surface-var);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+}
+
+.gov-subtab.active {
+  color: var(--on-surface);
+  border-bottom-color: var(--on-surface);
+}
+
+.gov-search {
+  min-width: min(420px, 100%);
+}
+
+.gov-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.gov-service-card {
+  background: var(--surface);
+  border: 1px solid rgba(26, 31, 54, 0.16);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.gov-service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.gov-card-img {
+  width: 100%;
+  height: 140px;
+  background: var(--surface-high);
+}
+
+.gov-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gov-card-body {
+  padding: 1rem 1rem 1.15rem;
+}
+
+.gov-card-title {
+  color: #000;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+
+.gov-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.45rem;
+}
+
+.gov-row-ic {
+  width: 20px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.gov-row-txt {
+  color: var(--on-surface-var);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.gov-phone {
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: #1f3b64;
+  font-weight: 650;
+}
+
+.gov-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.gov-page-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(26, 31, 54, 0.2);
+  background: var(--surface);
+  color: var(--on-surface);
+  font-weight: 700;
+}
+
+.gov-page-btn.active {
+  background: var(--gov-maroon);
+  border-color: var(--gov-maroon);
+  color: #fff;
+}
+
+.gov-page-btn.active-primary {
+  background: var(--primary-grad);
+  border-color: var(--primary-dark);
+  color: var(--on-primary);
+  box-shadow: 0 4px 12px rgba(0, 85, 204, 0.18);
+}
+
+.gov-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--outline-var);
+  -webkit-overflow-scrolling: touch;
+}
+
+.gov-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 760px;
+}
+
+/* Utility: simple responsive 2-column split grid */
+.split-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.gov-table thead th {
+  padding: 1.2rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--on-surface);
+  text-align: left;
+  background: var(--surface-low);
+  border-bottom: 2px solid var(--outline-var);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.gov-table tbody td {
+  padding: 1.1rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--on-surface-var);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--outline-var);
+}
+
+.gov-table tbody tr {
+  transition: all var(--transition-fast);
+}
+
+.gov-table tbody tr.even,
+.gov-table tbody tr.odd {
+  background: transparent;
+}
+
+.gov-table tbody tr:hover {
+  background: var(--surface-low);
+  cursor: default;
+}
+
+.gov-table .gov-mob {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.gov-admin-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 1rem 0 1.25rem;
+}
+
+.gov-toggle {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid rgba(26, 31, 54, 0.16);
+  border-radius: 14px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.gov-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  font-weight: 800;
+  color: var(--on-surface-var);
+}
+
+.gov-toggle-btn.active {
+  background: var(--on-surface);
+  color: #fff;
+}
+
+.gov-pill {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 31, 54, 0.16);
+  background: var(--surface);
+  font-weight: 800;
+  color: var(--on-surface);
+}
+
+.gov-admin-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .gov-grid { grid-template-columns: repeat(2, 1fr); }
+  .gov-cards { grid-template-columns: repeat(2, 1fr); }
+  .gov-admin-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .gov-grid { grid-template-columns: 1fr; }
+  .gov-cards { grid-template-columns: 1fr; }
+  .gov-search { min-width: 100%; }
+}
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -547,6 +858,18 @@ input, select, textarea {
 .badge-resolved:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.25);
+}
+
+.badge-primary {
+  background: var(--secondary-cont);
+  color: var(--on-secondary-cont);
+  border-color: rgba(0, 85, 204, 0.35);
+  box-shadow: 0 2px 4px rgba(0, 85, 204, 0.12);
+}
+
+.badge-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 85, 204, 0.2);
 }
 
 /* ── Tables ───────────────────────────────────────────── */
@@ -889,6 +1212,7 @@ tbody tr:hover {
   .main-content { 
     margin-left: 0; 
     padding: 1.5rem 1.25rem;
+    padding-bottom: 6rem;
   }
   .page-header {
     margin-bottom: 1.5rem;
@@ -926,6 +1250,10 @@ tbody tr:hover {
   .search-box {
     max-width: 100% !important;
   }
+
+  .split-grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -936,6 +1264,56 @@ tbody tr:hover {
     border-bottom: none;
     margin-bottom: 1.5rem;
   }
+}
+
+/* Mobile bottom capsule navigation */
+.mobile-capsule-nav { display: none; }
+
+@media (max-width: 768px) {
+  .mobile-capsule-nav {
+    display: flex;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 220;
+
+    background: var(--surface);
+    border: 1px solid var(--outline-var);
+    box-shadow: var(--shadow-float);
+    border-radius: 999px;
+    padding: 0.35rem;
+    gap: 0.25rem;
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mc-item {
+    border: none;
+    background: transparent;
+    border-radius: 999px;
+    padding: 0.55rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--on-surface-var);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .mc-item.active {
+    background: var(--primary-grad);
+    color: var(--on-primary);
+  }
+
+  .mc-icon { font-size: 1rem; }
+  .mc-label { font-size: 0.85rem; }
+}
+
+@media (max-width: 640px) {
+  .mc-label { display: none; }
+  .mc-item { padding: 0.6rem 0.75rem; }
 }
 
 /* ── Skeleton Loaders ─────────────────────────────────── */
@@ -1038,6 +1416,18 @@ tbody tr:hover {
 .btn-secondary:active { 
   transform: scale(0.98);
 }
+
+/* Officer Contacts */
+.officer-designation {
+  color: var(--on-surface-var);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Minimal utility classes used by Officer Contacts page */
+.max-w-7xl { max-width: 80rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
 
 /* ── Loading States ───────────────────────────────────── */
 .loading-overlay {

@@ -121,7 +121,7 @@ export default function CreateAnnouncement() {
           <p>Publish official notices to citizens in specific areas.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+        <div className="split-grid-2" style={{ gap: '2rem', alignItems: 'start' }}>
 
           {/* Form */}
           <div className="card">

@@ -1,0 +1,273 @@
+/* Minimal Tailwind-like container utilities (project does not use Tailwind) */
+.max-w-7xl { max-width: 80rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.about-container {
+  padding: 1.5rem 1rem 0;
+}
+
+.about-section {
+  padding: 4rem 0;
+}
+
+.about-section-title {
+  display: inline-block;
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 3px solid var(--primary);
+}
+
+.about-section-title--tight {
+  margin-bottom: 1.25rem;
+}
+
+.about-paragraph {
+  margin-top: 0.85rem;
+}
+
+/* I. Hero */
+.about-hero {
+  position: relative;
+  height: 450px;
+  width: 100%;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.about-hero-title {
+  color: #fff;
+  font-size: 2.4rem;
+}
+
+.about-hero-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 0.6rem;
+  max-width: 56ch;
+}
+
+/* II. History grid */
+.about-history-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.about-history-col {
+  background: var(--surface);
+  border: 1px solid var(--outline-var);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.25rem 1.35rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.about-history-col--right {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-low) 100%);
+}
+
+@media (min-width: 768px) {
+  .about-history-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 2rem;
+  }
+}
+
+/* III. Cultural grid */
+.about-cultural-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .about-cultural-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.about-card {
+  background: var(--surface);
+  border: 1px solid var(--outline-var);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.about-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 85, 204, 0.09);
+  color: var(--primary);
+  margin-bottom: 0.9rem;
+}
+
+.about-card-title {
+  margin-bottom: 0.35rem;
+}
+
+/* IV. Festivals zig-zag */
+.about-festival-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.about-festival {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--outline-var);
+  border-radius: var(--radius-2xl);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.about-festival--reverse {
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .about-festival {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .about-festival--reverse {
+    flex-direction: row-reverse;
+  }
+}
+
+.about-festival-media {
+  flex: 1;
+}
+
+.about-festival-text {
+  flex: 1;
+  padding: 0.25rem 0.25rem 0.5rem;
+}
+
+.about-festival-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.about-aspect-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--surface-high);
+}
+
+.about-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-ol {
+  margin: 0.85rem 0 0.95rem;
+  padding-left: 1.25rem;
+  color: var(--on-surface-var);
+}
+
+.about-ol li {
+  margin: 0.35rem 0;
+}
+
+/* V. Transport strip */
+.about-transport {
+  margin: 4rem 0 0;
+  padding: 3.25rem 0;
+  background: var(--background-alt);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--outline-var);
+}
+
+.about-transport-inner {
+  padding: 0 1rem;
+}
+
+.about-transport-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+  margin-top: 1.2rem;
+}
+
+@media (min-width: 768px) {
+  .about-transport-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+}
+
+.about-transport-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--outline-var);
+  border-radius: var(--radius-xl);
+  padding: 1rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.about-transport-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 85, 204, 0.09);
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+
+.about-transport-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.about-transport-mode {
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.about-transport-desc {
+  color: var(--on-surface-var);
+}
+

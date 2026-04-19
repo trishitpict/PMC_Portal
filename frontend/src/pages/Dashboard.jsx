@@ -86,7 +86,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="split-grid-2">
           {/* Recent complaints */}
           <div>
             <div className="section-header">

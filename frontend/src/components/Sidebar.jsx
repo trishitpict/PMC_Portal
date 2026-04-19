@@ -2,16 +2,23 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { disconnectSocket } from '../socket/socket';
+import MobileCapsuleNav from './MobileCapsuleNav.jsx';
 
 const CitizenLinks = [
   { path: '/dashboard',     label: 'Dashboard',         icon: '🏠' },
   { path: '/complaints',    label: 'My Complaints',      icon: '📋' },
   { path: '/announcements', label: 'Announcements',      icon: '📢' },
+  { path: '/services',      label: 'Services & Contacts', icon: '🏛️' },
+  { path: '/officers',      label: 'Officer Contacts',   icon: '👮' },
+  { path: '/about-pune',    label: 'About Pune',         icon: 'ℹ️' },
 ];
 const AdminLinks = [
   { path: '/admin',               label: 'Dashboard',          icon: '🏠' },
   { path: '/admin/complaints',    label: 'Manage Complaints',   icon: '📋' },
   { path: '/admin/announcements', label: 'Create Announcement', icon: '📢' },
+  { path: '/admin/services',      label: 'Services & Contacts', icon: '🏛️' },
+  { path: '/admin/officers',      label: 'Officer Contacts',    icon: '👮' },
+  { path: '/about-pune',          label: 'About Pune',          icon: 'ℹ️' },
 ];
 
 export default function Sidebar() {
@@ -77,6 +84,8 @@ export default function Sidebar() {
         className={`sidebar-overlay ${open ? 'visible' : ''}`}
         onClick={() => setOpen(false)}
       />
+
+      <MobileCapsuleNav links={links} />
     </>
   );
 }
