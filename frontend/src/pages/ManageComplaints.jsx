@@ -5,6 +5,7 @@ import Notification from '../components/Notification.jsx';
 import Breadcrumb from '../components/Breadcrumb.jsx';
 import { SkeletonRow } from '../components/SkeletonLoader.jsx';
 import api from '../services/api';
+import { SERVER_BASE_URL } from '../services/runtimeConfig';
 
 export default function ManageComplaints() {
   const { user } = useAuth();
@@ -248,7 +249,7 @@ export default function ManageComplaints() {
                     {editing.images.map((image, index) => (
                       <img
                         key={index}
-                        src={`http://localhost:5000${image}`}
+                        src={`${SERVER_BASE_URL}${image}`}
                         alt={`Complaint image ${index + 1}`}
                         style={{
                           width: '100px',
@@ -258,7 +259,7 @@ export default function ManageComplaints() {
                           border: '1px solid var(--outline)',
                           cursor: 'pointer'
                         }}
-                        onClick={() => window.open(`http://localhost:5000${image}`, '_blank')}
+                        onClick={() => window.open(`${SERVER_BASE_URL}${image}`, '_blank')}
                       />
                     ))}
                   </div>

@@ -6,6 +6,7 @@ import Breadcrumb from '../components/Breadcrumb.jsx';
 import { SkeletonCard } from '../components/SkeletonLoader.jsx';
 import LocationPicker from '../components/LocationPicker.jsx';
 import api from '../services/api';
+import { SERVER_BASE_URL } from '../services/runtimeConfig';
 
 const CATEGORIES = ['Roads', 'Water Supply', 'Electricity', 'Garbage', 'Drainage', 'Street Lights', 'Other'];
 
@@ -338,7 +339,7 @@ export default function Complaints() {
                         {c.images.map((image, index) => (
                           <img
                             key={index}
-                            src={`http://localhost:5000${image}`}
+                            src={`${SERVER_BASE_URL}${image}`}
                             alt={`Complaint image ${index + 1}`}
                             style={{
                               width: '80px',
@@ -348,7 +349,7 @@ export default function Complaints() {
                               border: '1px solid var(--outline)',
                               cursor: 'pointer'
                             }}
-                            onClick={() => window.open(`http://localhost:5000${image}`, '_blank')}
+                            onClick={() => window.open(`${SERVER_BASE_URL}${image}`, '_blank')}
                           />
                         ))}
                       </div>
