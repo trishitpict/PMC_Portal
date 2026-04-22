@@ -254,8 +254,10 @@ export default function AdminServices() {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="main-content govtech gov-bg">
+      <main className="main-content govtech gov-bg admin-gov-main-content">
         <Breadcrumb />
+
+        <div className="admin-gov-page-wrap">
 
         <div className="gov-header">
           <div>
@@ -588,6 +590,7 @@ export default function AdminServices() {
               </div>
             )}
           </div>
+        </div>
         </div>
       </main>
       <Notification />

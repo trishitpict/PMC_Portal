@@ -72,6 +72,18 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
 body {
   font-family: 'Outfit', sans-serif;
   background: var(--background);
@@ -596,6 +608,10 @@ input, select, textarea {
   line-height: 1.6;
 }
 
+.dashboard-mobile-logout {
+  display: none;
+}
+
 /* ── Cards ────────────────────────────────────────────── */
 .card {
   background: var(--surface);
@@ -879,6 +895,7 @@ input, select, textarea {
   background: var(--surface);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--outline-var);
+  -webkit-overflow-scrolling: touch;
 }
 table { 
   width: 100%; 
@@ -909,6 +926,65 @@ tbody tr {
 tbody tr:hover { 
   background: var(--surface-low);
   cursor: pointer;
+}
+
+.desktop-table-only {
+  display: block;
+}
+
+.admin-complaint-mobile-list {
+  display: none;
+}
+
+.admin-complaint-mobile-card {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--outline-var);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+button.admin-complaint-mobile-card {
+  cursor: pointer;
+}
+
+.admin-complaint-mobile-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.admin-complaint-mobile-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.admin-complaint-mobile-desc {
+  font-size: 0.84rem;
+  color: var(--on-surface-var);
+  line-height: 1.45;
+}
+
+.admin-complaint-mobile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.admin-complaint-mobile-meta span {
+  font-size: 0.74rem;
+  color: var(--on-surface-var);
+  background: var(--surface-low);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
 }
 
 /* ── Auth Pages ───────────────────────────────────────── */
@@ -1198,13 +1274,22 @@ tbody tr:hover {
   }
   
   .sidebar {
-    width: 100%;
-    max-width: 280px;
-    translate: -100% 0;
-    transition: translate var(--transition-base);
+    width: min(280px, 85vw);
+    transform: translateX(-110%);
+    visibility: hidden;
+    pointer-events: none;
+    will-change: transform;
+    transition:
+      transform var(--transition-base),
+      visibility 0s linear var(--transition-base);
   }
   .sidebar.open {
-    translate: 0 0;
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      transform var(--transition-base),
+      visibility 0s linear 0s;
     box-shadow: var(--shadow-xl);
   }
   .sidebar-overlay.visible { display: block; }
@@ -1214,6 +1299,9 @@ tbody tr:hover {
     padding: 1.5rem 1.25rem;
     padding-bottom: 6rem;
   }
+  .main-content > * {
+    min-width: 0;
+  }
   .page-header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
@@ -1221,6 +1309,22 @@ tbody tr:hover {
   .page-header h1 {
     font-size: 1.6rem;
   }
+
+  .dashboard-mobile-header {
+    position: relative;
+    padding-right: 4.75rem;
+  }
+
+  .btn-secondary.dashboard-mobile-logout {
+    display: inline-flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0.45rem 0.8rem;
+    white-space: nowrap;
+  }
+
   .form-row { grid-template-columns: 1fr; }
   .card-grid { grid-template-columns: 1fr 1fr; }
   .card { padding: 1.5rem; }
@@ -1238,6 +1342,11 @@ tbody tr:hover {
   .modal {
     padding: 2rem;
     margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  .modal-actions {
+    flex-wrap: wrap;
   }
   .section-header {
     flex-direction: column;
@@ -1254,6 +1363,51 @@ tbody tr:hover {
   .split-grid-2 {
     grid-template-columns: 1fr;
   }
+
+  .desktop-table-only {
+    display: none;
+  }
+
+  .admin-complaint-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .admin-quick-actions .btn-primary,
+  .admin-quick-actions .btn-secondary,
+  .manage-toolbar .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .manage-toolbar > div {
+    width: 100%;
+  }
+
+  .manage-toolbar > div button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .gov-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .gov-filterbar {
+    align-items: stretch;
+  }
+
+  .ann-meta {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .area-select-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1263,6 +1417,15 @@ tbody tr:hover {
   .page-header {
     border-bottom: none;
     margin-bottom: 1.5rem;
+  }
+}
+
+/* Force-disable desktop sidebar UI on mobile; use capsule nav instead */
+@media (max-width: 768px) {
+  .sidebar,
+  .top-navbar,
+  .sidebar-overlay {
+    display: none !important;
   }
 }
 
@@ -1428,6 +1591,57 @@ tbody tr:hover {
 .max-w-7xl { max-width: 80rem; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 .px-4 { padding-left: 1rem; padding-right: 1rem; }
+
+.officer-nav-arrow {
+  display: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .officer-main-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .admin-gov-main-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .officer-page-wrap {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .admin-gov-page-wrap {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .officer-pagination-nav {
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .officer-nav-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 999px;
+    justify-content: center;
+  }
+
+  .officer-nav-text {
+    display: none;
+  }
+
+  .officer-nav-arrow {
+    display: inline-block;
+  }
+}
 
 /* ── Loading States ───────────────────────────────────── */
 .loading-overlay {

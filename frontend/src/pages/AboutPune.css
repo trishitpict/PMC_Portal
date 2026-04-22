@@ -6,6 +6,21 @@
   padding: 1.5rem 1rem 0;
 }
 
+@media (max-width: 768px) {
+  .about-main-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .about-container {
+    padding: 1rem 0 0;
+  }
+
+  .about-transport-inner {
+    padding: 0 0.25rem;
+  }
+}
+
 .about-section {
   padding: 4rem 0;
 }

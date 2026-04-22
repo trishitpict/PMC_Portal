@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar.jsx';
 import Notification from '../components/Notification.jsx';
 import Breadcrumb from '../components/Breadcrumb.jsx';
-import { SkeletonRow } from '../components/SkeletonLoader.jsx';
+import { SkeletonCard, SkeletonRow } from '../components/SkeletonLoader.jsx';
 import api from '../services/api';
 import { SERVER_BASE_URL } from '../services/runtimeConfig';
 
@@ -224,7 +224,7 @@ export default function ManageComplaints() {
           <p>Review and update the status of citizen grievances.</p>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+        <div className="manage-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {[
               { key: 'all',         label: `All (${counts.all})` },
@@ -250,14 +250,14 @@ export default function ManageComplaints() {
         {/* Category + Search */}
         {complaints.length > 0 && (
           <div className="filter-bar" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-end', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'grid', gap: '0.35rem' }}>
+            <div style={{ display: 'grid', gap: '0.35rem', flex: '1 1 190px', maxWidth: '220px' }}>
               <label htmlFor="manage-category-filter" style={{ fontSize: '0.8rem', color: 'var(--on-surface-var)' }}>
                 Category
               </label>
               <select
                 id="manage-category-filter"
                 className="form-control"
-                style={{ minWidth: '190px' }}
+                style={{ width: '100%' }}
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 aria-label="Filter by complaint category"
@@ -269,7 +269,7 @@ export default function ManageComplaints() {
               </select>
             </div>
 
-            <div style={{ display: 'grid', gap: '0.35rem', flex: 1, minWidth: '240px', maxWidth: '420px' }}>
+            <div style={{ display: 'grid', gap: '0.35rem', flex: '2 1 280px', minWidth: 0, maxWidth: '420px' }}>
               <label htmlFor="manage-search-filter" style={{ fontSize: '0.8rem', color: 'var(--on-surface-var)' }}>
                 Search
               </label>
@@ -305,26 +305,34 @@ export default function ManageComplaints() {
         )}
 
         {loading ? (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Citizen</th>
-                  <th>Area</th>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Filed</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <SkeletonRow key={i} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="table-wrap desktop-table-only">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Citizen</th>
+                    <th>Area</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Filed</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <SkeletonRow key={i} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="admin-complaint-mobile-list">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📭</div>
@@ -339,7 +347,7 @@ export default function ManageComplaints() {
             <p style={{ fontSize: '0.85rem', color: 'var(--on-surface-var)', marginBottom: '1rem' }}>
               Showing <strong>{filtered.length}</strong> of <strong>{complaints.length}</strong> complaints
             </p>
-            <div className="table-wrap">
+            <div className="table-wrap desktop-table-only">
               <table>
                 <thead>
                   <tr>
@@ -399,6 +407,48 @@ export default function ManageComplaints() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="admin-complaint-mobile-list">
+              {filtered.map((c) => (
+                <div key={c._id} className="admin-complaint-mobile-card">
+                  <div className="admin-complaint-mobile-head">
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--on-surface)' }}>{c.userId?.name ?? '—'}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--on-surface-var)' }}>{c.userId?.email ?? ''}</div>
+                    </div>
+                    <span className={`badge badge-${c.status}`}>
+                      <span className={`status-dot ${c.status}`}></span>
+                      {c.status.replace('_', ' ')}
+                    </span>
+                  </div>
+
+                  <div className="admin-complaint-mobile-title">{c.title}</div>
+                  <div className="admin-complaint-mobile-desc">
+                    {c.description.substring(0, 110)}{c.description.length > 110 ? '…' : ''}
+                  </div>
+
+                  <div className="admin-complaint-mobile-meta">
+                    <span>📍 {c.userId?.area ?? '—'}</span>
+                    <span>{c.category}</span>
+                    <span>{new Date(c.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  </div>
+
+                  {(c.images?.length || c.location?.coordinates?.latitude) ? (
+                    <div style={{ fontSize: '0.76rem', color: 'var(--on-surface-var)' }}>
+                      {c.images?.length ? `📷 ${c.images.length} image${c.images.length > 1 ? 's' : ''}` : ''}
+                      {c.images?.length && c.location?.coordinates?.latitude ? ' · ' : ''}
+                      {c.location?.coordinates?.latitude ? '📍 Location attached' : ''}
+                    </div>
+                  ) : null}
+
+                  <div style={{ marginTop: '0.35rem' }}>
+                    <button className="btn-secondary btn-sm" onClick={() => openEdit(c)}>
+                      Update
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </>
         )}

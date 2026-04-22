@@ -85,7 +85,7 @@ export default function Announcements() {
             <div className="announcement-list">
               {filteredAnnouncements.map((a) => (
                 <div className="announcement-card" key={a._id}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                     <h4>{a.title}</h4>
                     <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                       {a.areas && a.areas.map((area) => (

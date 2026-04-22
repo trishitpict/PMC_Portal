@@ -54,10 +54,10 @@ export default function OfficerPage() {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="main-content govtech gov-bg">
+      <main className="main-content govtech gov-bg officer-main-content">
         <Breadcrumb />
 
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 officer-page-wrap">
           <div className="page-header" style={{ marginBottom: '1.5rem' }}>
             <h1 style={{ color: 'var(--primary)' }}>Officer Contacts</h1>
             <p>Directory of key municipal officers (email and mobile).</p>
@@ -88,14 +88,20 @@ export default function OfficerPage() {
           )}
 
           {/* Pagination */}
-          <nav className="gov-pagination" aria-label="Officer contacts pagination" style={{ flexWrap: 'wrap' }}>
+          <nav
+            className="gov-pagination officer-pagination-nav"
+            aria-label="Officer contacts pagination"
+            style={{ flexWrap: 'wrap' }}
+          >
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary officer-nav-btn"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
+              aria-label="Previous page"
             >
-              Previous
+              <span className="officer-nav-text">Previous</span>
+              <span className="officer-nav-arrow" aria-hidden="true">←</span>
             </button>
 
             {pages.map((p) => (
@@ -112,11 +118,13 @@ export default function OfficerPage() {
 
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary officer-nav-btn"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              aria-label="Next page"
             >
-              Next
+              <span className="officer-nav-text">Next</span>
+              <span className="officer-nav-arrow" aria-hidden="true">→</span>
             </button>
           </nav>
         </div>

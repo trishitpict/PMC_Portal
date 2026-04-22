@@ -6,14 +6,20 @@ import Notification from '../components/Notification.jsx';
 import Breadcrumb from '../components/Breadcrumb.jsx';
 import { SkeletonStatCard, SkeletonCard } from '../components/SkeletonLoader.jsx';
 import api from '../services/api';
-import { connectSocket } from '../socket/socket';
+import { connectSocket, disconnectSocket } from '../socket/socket';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleMobileLogout = () => {
+    disconnectSocket();
+    logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     connectSocket(user._id, user.area);
@@ -46,7 +52,15 @@ export default function Dashboard() {
       <Sidebar />
       <main className="main-content">
         <Breadcrumb />
-        <div className="page-header">
+        <div className="page-header dashboard-mobile-header">
+          <button
+            type="button"
+            className="btn-secondary btn-sm dashboard-mobile-logout"
+            onClick={handleMobileLogout}
+            aria-label="Logout"
+          >
+            Logout
+          </button>
           <h1>Welcome back, {user.name.split(' ')[0]} 👋</h1>
           <p>Here's an overview of your complaints and local announcements in <strong>{user.area}</strong>.</p>
         </div>

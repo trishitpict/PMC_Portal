@@ -99,7 +99,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
           <button
             className={tab === 'complaints' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'}
             onClick={() => setTab('complaints')}

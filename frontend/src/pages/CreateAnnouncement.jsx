@@ -146,7 +146,7 @@ export default function CreateAnnouncement() {
 
               <div className="form-group">
                 <label><span style={{ color: 'var(--error)' }}>*</span> Target Areas (select multiple)</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginBottom: '0.75rem', maxHeight: '200px', overflowY: 'auto', padding: '0.5rem', border: '1px solid var(--outline)', borderRadius: 'var(--radius-sm)' }}>
+                <div className="area-select-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginBottom: '0.75rem', maxHeight: '200px', overflowY: 'auto', padding: '0.5rem', border: '1px solid var(--outline)', borderRadius: 'var(--radius-sm)' }}>
                   {AREAS.map((area) => (
                     <label key={area} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
                       <input
@@ -269,7 +269,7 @@ export default function CreateAnnouncement() {
                 <div className="announcement-list">
                   {filteredAnnouncements.map((a) => (
                     <div className="announcement-card" key={a._id} style={{ position: 'relative' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                         <h4>{a.title}</h4>
                         <button
                           onClick={() => handleDelete(a._id)}

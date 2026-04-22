@@ -70,7 +70,7 @@ export default function AboutPune() {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content about-main-content">
         <Breadcrumb />
 
         <div className="max-w-7xl mx-auto about-container">
