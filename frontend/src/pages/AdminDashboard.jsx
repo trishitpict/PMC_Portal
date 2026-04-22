@@ -54,7 +54,7 @@ export default function AdminDashboard() {
               <div className="stat-card">
                 <span className="stat-label">Total Complaints</span>
                 <span className="stat-value">{total}</span>
-                <span className="stat-sub">All time</span>
+                <span className="stat-sub">All categories</span>
               </div>
               <div className="stat-card">
                 <span className="stat-label">Pending</span>

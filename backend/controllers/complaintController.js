@@ -26,6 +26,131 @@ const upload = multer({
   }
 });
 
+const parseCategories = (value) => {
+  if (!value) return [];
+  const values = Array.isArray(value) ? value : [value];
+  return [...new Set(
+    values
+      .flatMap((item) => String(item).split(','))
+      .map((item) => item.trim())
+      .filter(Boolean)
+  )];
+};
+
+const hasExplicitTime = (value) => typeof value === 'string' && /T\d{2}:\d{2}/.test(value);
+
+const getDateRange = ({ range, from, to }) => {
+  const now = new Date();
+
+  if (!range || range === 'all') return { start: null, end: null };
+
+  if (range === 'today') {
+    const start = new Date(now);
+    const end = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  }
+
+  if (range === 'last7') {
+    const start = new Date(now);
+    const end = new Date(now);
+    start.setDate(start.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  }
+
+  if (range === 'last30') {
+    const start = new Date(now);
+    const end = new Date(now);
+    start.setDate(start.getDate() - 29);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  }
+
+  if (range === 'custom') {
+    if (!from || !to) {
+      return { error: 'from and to are required for custom range' };
+    }
+
+    const start = new Date(from);
+    const end = new Date(to);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return { error: 'Invalid custom range date values' };
+    }
+
+    if (!hasExplicitTime(from)) {
+      start.setHours(0, 0, 0, 0);
+    }
+    if (!hasExplicitTime(to)) {
+      end.setHours(23, 59, 59, 999);
+    }
+
+    if (start > end) {
+      return { error: 'from date cannot be after to date' };
+    }
+
+    return { start, end };
+  }
+
+  return { error: 'Invalid range value. Use all, today, last7, last30, custom.' };
+};
+
+const csvSafe = (value) => {
+  if (value === null || value === undefined) return '';
+  const str = String(value);
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+const toCsv = (rows) => {
+  const headers = [
+    'Complaint ID',
+    'Title',
+    'Description',
+    'Category',
+    'Status',
+    'Remarks',
+    'Citizen Name',
+    'Citizen Email',
+    'Citizen Area',
+    'Location Area',
+    'Address',
+    'Latitude',
+    'Longitude',
+    'Created At',
+    'Updated At',
+  ];
+
+  const lines = rows.map((c) => {
+    const lat = c.location?.coordinates?.latitude;
+    const lng = c.location?.coordinates?.longitude;
+    return [
+      c._id,
+      c.title,
+      c.description,
+      c.category,
+      c.status,
+      c.remarks,
+      c.userId?.name,
+      c.userId?.email,
+      c.userId?.area,
+      c.location?.area,
+      c.location?.address,
+      lat === null || lat === undefined ? '' : lat,
+      lng === null || lng === undefined ? '' : lng,
+      c.createdAt ? new Date(c.createdAt).toISOString() : '',
+      c.updatedAt ? new Date(c.updatedAt).toISOString() : '',
+    ].map(csvSafe).join(',');
+  });
+
+  return [headers.map(csvSafe).join(','), ...lines].join('\n');
+};
+
 // @route  POST /api/complaints
 // @access Private (citizen)
 const createComplaint = async (req, res) => {
@@ -96,6 +221,47 @@ const getAllComplaints = async (req, res) => {
   }
 };
 
+// @route  GET /api/complaints/report
+// @access Private (admin)
+const getComplaintsReportCsv = async (req, res) => {
+  try {
+    const range = String(req.query.range || 'all').toLowerCase();
+    const { from, to } = req.query;
+    const categories = parseCategories(req.query.categories);
+    const includesAllCategories = categories.some((c) => c.toLowerCase() === 'all');
+
+    const dateRange = getDateRange({ range, from, to });
+    if (dateRange.error) {
+      return res.status(400).json({ message: dateRange.error });
+    }
+
+    const filter = {};
+    if (dateRange.start && dateRange.end) {
+      filter.createdAt = { $gte: dateRange.start, $lte: dateRange.end };
+    }
+
+    if (!includesAllCategories && categories.length > 0) {
+      filter.category = { $in: categories };
+    }
+
+    const complaints = await Complaint.find(filter)
+      .populate('userId', 'name email area')
+      .sort({ createdAt: -1 });
+
+    const csv = toCsv(complaints);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const fileName = `complaints-report-${stamp}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+
+    return res.status(200).send(`\uFEFF${csv}`);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // @route  PUT /api/complaints/:id
 // @access Private (admin)
 const updateComplaintStatus = async (req, res) => {
@@ -136,6 +302,7 @@ module.exports = {
   createComplaint,
   getUserComplaints,
   getAllComplaints,
+  getComplaintsReportCsv,
   updateComplaintStatus,
   upload,
 };

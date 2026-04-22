@@ -4,6 +4,7 @@ const {
   createComplaint,
   getUserComplaints,
   getAllComplaints,
+  getComplaintsReportCsv,
   updateComplaintStatus,
   upload,
 } = require('../controllers/complaintController');
@@ -16,6 +17,7 @@ router.get('/user', protect, authorizeRoles('citizen'), getUserComplaints);
 
 // Admin routes
 router.get('/all', protect, authorizeRoles('admin'), getAllComplaints);
+router.get('/report', protect, authorizeRoles('admin'), getComplaintsReportCsv);
 router.put('/:id', protect, authorizeRoles('admin'), updateComplaintStatus);
 
 module.exports = router;

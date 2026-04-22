@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar.jsx';
 import Notification from '../components/Notification.jsx';
 import Breadcrumb from '../components/Breadcrumb.jsx';
@@ -7,11 +6,21 @@ import { SkeletonRow } from '../components/SkeletonLoader.jsx';
 import api from '../services/api';
 import { SERVER_BASE_URL } from '../services/runtimeConfig';
 
+const COMPLAINT_CATEGORIES = [
+  'Roads',
+  'Water Supply',
+  'Electricity',
+  'Garbage',
+  'Drainage',
+  'Street Lights',
+  'Other',
+];
+
 export default function ManageComplaints() {
-  const { user } = useAuth();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all | pending | in_progress | resolved
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Edit modal state
@@ -19,6 +28,17 @@ export default function ManageComplaints() {
   const [editForm, setEditForm]     = useState({ status: '', remarks: '' });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError]   = useState('');
+
+  // Report modal state
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportRange, setReportRange] = useState('last30');
+  const [reportFrom, setReportFrom] = useState('');
+  const [reportTo, setReportTo] = useState('');
+  const [reportAllCategories, setReportAllCategories] = useState(true);
+  const [reportCategories, setReportCategories] = useState([]);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState('');
+  const [reportMessage, setReportMessage] = useState('');
 
   const fetchComplaints = async () => {
     setLoading(true);
@@ -50,10 +70,122 @@ export default function ManageComplaints() {
     } finally { setEditLoading(false); }
   };
 
+  const openReportModal = () => {
+    setReportError('');
+    setReportMessage('');
+    setReportOpen(true);
+  };
+
+  const toggleReportCategory = (category) => {
+    setReportCategories((prev) => (
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    ));
+  };
+
+  const extractReportErrorMessage = async (error) => {
+    const fallback = 'Failed to generate report';
+
+    if (error?.response?.data && typeof error.response.data === 'object' && !('text' in error.response.data)) {
+      return error.response.data.message || fallback;
+    }
+
+    if (error?.response?.data && typeof error.response.data.text === 'function') {
+      try {
+        const text = await error.response.data.text();
+        if (!text) return fallback;
+        try {
+          const parsed = JSON.parse(text);
+          return parsed.message || fallback;
+        } catch {
+          return text;
+        }
+      } catch {
+        return fallback;
+      }
+    }
+
+    return error?.message || fallback;
+  };
+
+  const handleReportDownload = async (e) => {
+    e.preventDefault();
+    setReportError('');
+    setReportMessage('');
+
+    if (reportRange === 'custom') {
+      if (!reportFrom || !reportTo) {
+        setReportError('Select both start and end time for custom range.');
+        return;
+      }
+      if (new Date(reportFrom) > new Date(reportTo)) {
+        setReportError('Start time cannot be after end time.');
+        return;
+      }
+    }
+
+    if (!reportAllCategories && reportCategories.length === 0) {
+      setReportError('Select at least one category or choose All categories.');
+      return;
+    }
+
+    setReportLoading(true);
+    try {
+      const params = { range: reportRange };
+      if (reportRange === 'custom') {
+        params.from = new Date(reportFrom).toISOString();
+        params.to = new Date(reportTo).toISOString();
+      }
+
+      if (reportAllCategories) {
+        params.categories = 'all';
+      } else {
+        params.categories = reportCategories.join(',');
+      }
+
+      const response = await api.get('/complaints/report', {
+        params,
+        responseType: 'blob',
+      });
+
+      const disposition = response.headers?.['content-disposition'] || '';
+      const fileNameMatch = disposition.match(/filename="?([^";]+)"?/i);
+      const fileName = fileNameMatch
+        ? fileNameMatch[1]
+        : `complaints-report-${new Date().toISOString().slice(0, 10)}.csv`;
+
+      const blob = response.data instanceof Blob
+        ? response.data
+        : new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setReportMessage(`Report downloaded: ${fileName}`);
+      setReportOpen(false);
+    } catch (error) {
+      const message = await extractReportErrorMessage(error);
+      setReportError(message);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   const filtered = useMemo(() => {
     let result = filter === 'all'
       ? complaints
       : complaints.filter((c) => c.status === filter);
+
+    if (categoryFilter !== 'all') {
+      result = result.filter((c) => c.category === categoryFilter);
+    }
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -67,7 +199,13 @@ export default function ManageComplaints() {
     }
 
     return result;
-  }, [complaints, filter, searchQuery]);
+  }, [complaints, filter, categoryFilter, searchQuery]);
+
+  useEffect(() => {
+    if (reportAllCategories) {
+      setReportCategories([]);
+    }
+  }, [reportAllCategories]);
 
   const counts = {
     all:         complaints.length,
@@ -86,36 +224,66 @@ export default function ManageComplaints() {
           <p>Review and update the status of citizen grievances.</p>
         </div>
 
-        {/* Filter pills */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-          {[
-            { key: 'all',         label: `All (${complaints.length})` },
-            { key: 'pending',     label: `Pending (${complaints.filter((c) => c.status === 'pending').length})` },
-            { key: 'in_progress', label: `In Progress (${complaints.filter((c) => c.status === 'in_progress').length})` },
-            { key: 'resolved',    label: `Resolved (${complaints.filter((c) => c.status === 'resolved').length})` },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={filter === key ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'}
-            >
-              {label}
-            </button>
-          ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {[
+              { key: 'all',         label: `All (${counts.all})` },
+              { key: 'pending',     label: `Pending (${counts.pending})` },
+              { key: 'in_progress', label: `In Progress (${counts.in_progress})` },
+              { key: 'resolved',    label: `Resolved (${counts.resolved})` },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={filter === key ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <button className="btn-primary" onClick={openReportModal}>
+            Download Complaints Report
+          </button>
         </div>
 
-        {/* Search */}
+        {/* Category + Search */}
         {complaints.length > 0 && (
-          <div className="filter-bar" style={{ marginBottom: '1.5rem' }}>
-            <div className="search-box" style={{ flex: 1, maxWidth: '350px' }}>
-              <input
-                type="text"
+          <div className="filter-bar" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-end', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gap: '0.35rem' }}>
+              <label htmlFor="manage-category-filter" style={{ fontSize: '0.8rem', color: 'var(--on-surface-var)' }}>
+                Category
+              </label>
+              <select
+                id="manage-category-filter"
                 className="form-control"
-                placeholder="Search by name, email, title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search complaints"
-              />
+                style={{ minWidth: '190px' }}
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                aria-label="Filter by complaint category"
+              >
+                <option value="all">All categories</option>
+                {COMPLAINT_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'grid', gap: '0.35rem', flex: 1, minWidth: '240px', maxWidth: '420px' }}>
+              <label htmlFor="manage-search-filter" style={{ fontSize: '0.8rem', color: 'var(--on-surface-var)' }}>
+                Search
+              </label>
+              <div className="search-box" style={{ width: '100%' }}>
+                <input
+                  id="manage-search-filter"
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by name, email, title..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search complaints"
+                />
+              </div>
             </div>
             {searchQuery && (
               <button
@@ -123,6 +291,14 @@ export default function ManageComplaints() {
                 onClick={() => setSearchQuery('')}
               >
                 Clear Search
+              </button>
+            )}
+            {categoryFilter !== 'all' && (
+              <button
+                className="btn-secondary btn-sm"
+                onClick={() => setCategoryFilter('all')}
+              >
+                Clear Category
               </button>
             )}
           </div>
@@ -153,7 +329,7 @@ export default function ManageComplaints() {
           <div className="empty-state">
             <div className="empty-icon">📭</div>
             <p>
-              {searchQuery || filter !== 'all'
+              {searchQuery || filter !== 'all' || categoryFilter !== 'all'
                 ? 'No complaints match your filters.'
                 : 'No complaints submitted yet.'}
             </p>
@@ -300,6 +476,131 @@ export default function ManageComplaints() {
                   </button>
                   <button type="submit" className="btn-primary" disabled={editLoading}>
                     {editLoading ? <span className="spinner" /> : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Report Modal */}
+        {reportOpen && (
+          <div className="modal-backdrop">
+            <div className="modal">
+              <h3>Generate Complaints CSV Report</h3>
+              <p style={{ fontSize: '0.88rem', color: 'var(--on-surface-var)', marginBottom: '1rem' }}>
+                Choose time range and category selection for export.
+              </p>
+
+              <form onSubmit={handleReportDownload}>
+                <div className="form-group">
+                  <label htmlFor="report-range">Time Range</label>
+                  <select
+                    id="report-range"
+                    className="form-control"
+                    value={reportRange}
+                    onChange={(e) => setReportRange(e.target.value)}
+                    aria-label="Select report time range"
+                  >
+                    <option value="all">All time</option>
+                    <option value="today">Today</option>
+                    <option value="last7">Last 7 days</option>
+                    <option value="last30">Last 30 days</option>
+                    <option value="custom">Custom time range</option>
+                  </select>
+                </div>
+
+                {reportRange === 'custom' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label htmlFor="report-from">Start time</label>
+                      <input
+                        id="report-from"
+                        type="datetime-local"
+                        className="form-control"
+                        value={reportFrom}
+                        onChange={(e) => setReportFrom(e.target.value)}
+                        max={reportTo || undefined}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label htmlFor="report-to">End time</label>
+                      <input
+                        id="report-to"
+                        type="datetime-local"
+                        className="form-control"
+                        value={reportTo}
+                        onChange={(e) => setReportTo(e.target.value)}
+                        min={reportFrom || undefined}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={reportAllCategories}
+                      onChange={(e) => setReportAllCategories(e.target.checked)}
+                    />
+                    All categories
+                  </label>
+                  <p className="form-hint">Turn off to select one or multiple categories.</p>
+                </div>
+
+                {!reportAllCategories && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className="btn-secondary btn-sm"
+                        onClick={() => setReportCategories([])}
+                      >
+                        Clear all
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {COMPLAINT_CATEGORIES.map((category) => (
+                        <label
+                          key={category}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            border: '1px solid var(--outline)',
+                            borderRadius: 999,
+                            padding: '0.35rem 0.7rem',
+                            fontSize: '0.8rem',
+                            background: 'var(--surface)'
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={reportCategories.includes(category)}
+                            onChange={() => toggleReportCategory(category)}
+                          />
+                          {category}
+                        </label>
+                      ))}
+                    </div>
+
+                    <p className="form-hint" style={{ marginTop: '0.6rem' }}>
+                      {reportCategories.length} categories selected.
+                    </p>
+                  </div>
+                )}
+
+                {reportError && <div className="info-box" style={{ background: 'rgba(186, 26, 26, 0.05)', borderLeftColor: 'var(--error)' }}>{reportError}</div>}
+                {!reportError && reportMessage && <div className="info-box" style={{ borderLeftColor: 'var(--success)' }}>{reportMessage}</div>}
+
+                <div className="modal-actions">
+                  <button type="button" className="btn-secondary" disabled={reportLoading} onClick={() => setReportOpen(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary" disabled={reportLoading}>
+                    {reportLoading ? 'Generating CSV...' : 'Download CSV'}
                   </button>
                 </div>
               </form>
